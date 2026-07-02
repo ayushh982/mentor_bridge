@@ -1,7 +1,10 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
 import authRoutes from "./routes/auth.routes.js";
+import mentorRoutes from "./routes/mentor.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
 
 import errorHandler from "./middleware/error.middleware.js";
 
@@ -23,6 +26,8 @@ app.use(cookieParser());
 
 //routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/mentors", mentorRoutes);
+app.use("/api/v1/bookings",bookingRoutes);
 
 
 app.use(errorHandler);
