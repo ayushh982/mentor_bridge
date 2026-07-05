@@ -22,12 +22,13 @@ const createReview = asyncHandler(async (req, res) => {
     if (booking.bookingStatus !== "completed") {
         throw new ApiError(400, "Session not completed");
     }
-    booking.isReviewed = true;
-    await booking.save();
 
     if (booking.isReviewed) {
     throw new ApiError(409, "Review already submitted");
     }
+
+    booking.isReviewed = true;
+    await booking.save();
 
     const alreadyReviewed = await Review.findOne({
         booking: bookingId,
