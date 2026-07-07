@@ -10,6 +10,7 @@ import reviewRoutes from "./routes/review.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import chatRoutes from "./routes/chat.routes.js";
 import videoRoutes from "./routes/video.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 import errorHandler from "./middleware/error.middleware.js";
 
@@ -38,6 +39,7 @@ app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/chat", chatRoutes);
 app.use("/api/v1/video", videoRoutes);
+app.use("/api/v1/ai", aiRoutes);
 
 app.use(errorHandler);
 
