@@ -101,10 +101,33 @@ const getAllMentors = asyncHandler(async (req, res) => {
     );
 
 });
+const getMyMentorProfile = asyncHandler(async (req, res) => {
+
+    const mentor = await MentorProfile.findOne({
+        user: req.user._id,
+    }).populate(
+        "user",
+        "fullName email avatar"
+    );
+
+    if (!mentor) {
+        throw new ApiError(404, "Mentor profile not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            mentor,
+            "Mentor profile fetched successfully"
+        )
+    );
+
+});
 
 export {
     createMentorProfile,
     updateMentorProfile,
     getMentorProfile,
     getAllMentors,
+    getMyMentorProfile
 };

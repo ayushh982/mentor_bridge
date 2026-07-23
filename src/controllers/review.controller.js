@@ -27,8 +27,7 @@ const createReview = asyncHandler(async (req, res) => {
     throw new ApiError(409, "Review already submitted");
     }
 
-    booking.isReviewed = true;
-    await booking.save();
+   
 
     const alreadyReviewed = await Review.findOne({
         booking: bookingId,
@@ -45,6 +44,8 @@ const createReview = asyncHandler(async (req, res) => {
         rating,
         comment,
     });
+    booking.isReviewed = true;
+    await booking.save();
 
     const reviews = await Review.find({
         mentor: booking.mentor,
@@ -116,8 +117,35 @@ const deleteReview = asyncHandler(async (req, res) => {
 
 });
 
+const getMyReviews = asyncHandler(async (req, res) => {
+
+    const mentor = await MentorProfile.findOne({
+        user: req.user._id,
+    });
+
+    if (!mentor) {
+        throw new ApiError(404, "Mentor not found");
+    }
+
+    const reviews = await Review.find({
+        mentor: mentor._id,
+    })
+    .populate("student", "fullName avatar")
+    .sort({ createdAt: -1 });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            reviews,
+            "Reviews fetched successfully"
+        )
+    );
+
+});
+
 export {
     createReview,
     getMentorReviews,
     deleteReview,
+    getMyReviews
 };

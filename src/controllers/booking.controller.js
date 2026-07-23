@@ -69,6 +69,39 @@ const getMyBookings = asyncHandler(async (req, res) => {
     );
 });
 
+const getMentorBookings = asyncHandler(async (req, res) => {
+
+    if (req.user.role !== "mentor") {
+        throw new ApiError(403, "Only mentors can access bookings");
+    }
+
+    const mentor = await MentorProfile.findOne({
+        user: req.user._id,
+    });
+
+    if (!mentor) {
+        throw new ApiError(404, "Mentor profile not found");
+    }
+
+    const bookings = await Booking.find({
+        mentor: mentor._id,
+    })
+        .populate(
+            "student",
+            "fullName email avatar"
+        )
+        .sort({ sessionDate: 1 });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            bookings,
+            "Mentor bookings fetched successfully"
+        )
+    );
+
+});
+
 const cancelBooking = asyncHandler(async (req, res) => {
 
     const booking = await Booking.findById(req.params.id);
@@ -123,4 +156,76 @@ const rescheduleBooking = asyncHandler(async (req, res) => {
     );
 });
 
-export {bookSession,getMyBookings,cancelBooking,rescheduleBooking};
+const getMentorStats = asyncHandler(async (req, res) => {
+
+    if (req.user.role !== "mentor") {
+        throw new ApiError(403, "Only mentors can access mentor stats");
+    }
+
+    const mentor = await MentorProfile.findOne({
+        user: req.user._id,
+    });
+
+    if (!mentor) {
+        throw new ApiError(404, "Mentor profile not found");
+    }
+
+    const bookings = await Booking.find({
+        mentor: mentor._id,
+    });
+
+    const today = new Date();
+
+    const todaySessions = bookings.filter((booking) => {
+        return (
+            booking.sessionDate.toDateString() === today.toDateString() &&
+            booking.bookingStatus !== "cancelled"
+        );
+    }).length;
+
+    const totalStudents = new Set(
+        bookings.map((booking) => booking.student.toString())
+    ).size;
+
+    const totalBookings = bookings.length;
+
+    const pendingBookings = bookings.filter(
+        (booking) => booking.bookingStatus === "pending"
+    ).length;
+
+    const completedBookings = bookings.filter(
+        (booking) => booking.bookingStatus === "completed"
+    ).length;
+
+    const cancelledBookings = bookings.filter(
+        (booking) => booking.bookingStatus === "cancelled"
+    ).length;
+
+    const totalEarnings = bookings
+        .filter(
+            (booking) =>
+                booking.bookingStatus !== "cancelled" &&
+                booking.paymentStatus === "paid"
+        )
+        .reduce((sum, booking) => sum + booking.amount, 0);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                todaySessions,
+                totalStudents,
+                totalBookings,
+                pendingBookings,
+                completedBookings,
+                cancelledBookings,
+                totalEarnings,
+            },
+            "Mentor dashboard stats fetched successfully"
+        )
+    );
+});
+
+
+
+export {bookSession,getMyBookings,cancelBooking,rescheduleBooking,getMentorBookings,getMentorStats};

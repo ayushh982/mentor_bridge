@@ -5,11 +5,14 @@ import {
     createReview,
     getMentorReviews,
     deleteReview,
+    getMyReviews
 } from "../controllers/review.controller.js";
 
 const router = Router();
 
 router.post("/", verifyJWT, createReview);
+
+router.get("/my-reviews", verifyJWT, getMyReviews);
 
 router.get("/:mentorId", getMentorReviews);
 
